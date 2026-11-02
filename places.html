@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>방문 장소 · 광주 문예기행</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Batang:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+<header class="top"><nav>
+  <a class="brand" href="index.html">광주 문예기행</a>
+  <a href="index.html">처음</a>
+  <a href="comic.html">인물 웹툰</a>
+  <a href="places.html" aria-current="page">방문 장소</a>
+</nav></header>
+
+<main>
+  <h1>방문 장소</h1>
+  <p class="lede">장소를 고르면 사진과 설명, 소설 속 연결 장면이 나타납니다.</p>
+
+  <div class="places">
+    <ul class="place-list" id="list" aria-label="장소 목록"></ul>
+    <article class="detail" id="detail" aria-live="polite"></article>
+  </div>
+</main>
+
+<script>
+/* =========================================================
+   장소 데이터 — 실제 일정에 맞게 추가·삭제·순서 변경하세요.
+   img: images 폴더에 넣은 사진 파일 이름 (없으면 자리표시 그림이 나옵니다)
+   credit: 사진 출처 (직접 찍은 사진이면 '직접 촬영')
+   chId: 웹툰 페이지의 인물 id (dongho, jeongdae, eunsook, jinsu, seonju, mother, author)
+   ========================================================= */
+const PLACES = [
+ { id:'dochung', name:'옛 전남도청', area:'동구 광산동 · 국립아시아문화전당 앞',
+   img:'images/dochung.jpg', credit:'',
+   desc:['1980년 5월 시민군이 항쟁 본부로 삼았던 곳. 5월 27일 새벽, 계엄군이 진입하면서 끝까지 남은 시민군이 최후를 맞았습니다.',
+         '지금은 국립아시아문화전당과 맞닿아 있으며, 당시 모습을 되살리는 복원 작업이 이어져 왔습니다.'],
+   book:'동호가 집에 가지 않고 마지막 밤을 보낸 곳(1장). 4장에서 진수 형이 아이들에게 “손 들고 나가라”고 말하던 장면의 무대이기도 합니다.',
+   chIds:['dongho','jinsu'],
+   tip:'복원·전시 일정에 따라 관람 범위가 달라질 수 있으니 방문 전 개방 여부를 확인하세요.' },
+
+ { id:'square', name:'5·18민주광장', area:'동구 금남로 1가 · 도청 앞 분수대',
+   img:'images/square.jpg', credit:'',
+   desc:['항쟁 기간 수많은 시민이 모여 궐기대회를 열었던 광장. 가운데 분수대는 연단으로 쓰였습니다.',
+         '지금도 광주의 주요 집회와 기념행사가 이곳에서 열립니다.'],
+   book:'소설 속 군중 장면과 시위의 한가운데. 동호가 정대를 잃은 거리의 풍경을 떠올리며 걸어 보세요.',
+   chIds:['dongho','jeongdae'],
+   tip:'광장 한가운데 서서 도청, 상무관, 금남로 방향을 차례로 둘러보면 소설 속 동선이 한눈에 들어옵니다.' },
+
+ { id:'sangmugwan', name:'상무관', area:'동구 금남로 · 옛 전남도청 옆',
+   img:'images/sangmugwan.jpg', credit:'',
+   desc:['원래는 체육관(무도관)이던 건물로, 항쟁 기간 희생자들의 시신을 안치하고 분향소를 차렸던 곳입니다.'],
+   book:'1장의 주 무대. 동호가 관 앞에 촛불을 켜고 이름을 적던 곳이며, 은숙(3장)과 선주(5장)도 이곳에서 동호와 함께 있었습니다.',
+   chIds:['dongho','eunsook','seonju'],
+   tip:'내부 공개 여부가 시기마다 다르니 미리 확인하세요. 들어갈 수 없다면 바깥에서 1장의 첫 장면을 함께 낭독해 보는 것도 좋습니다.' },
+
+ { id:'jeonil', name:'전일빌딩245', area:'동구 금남로 245',
+   img:'images/jeonil.jpg', credit:'',
+   desc:['당시 언론사가 입주해 있던 건물로, 외벽과 내부에 남은 총탄 자국이 헬기 사격의 흔적으로 감정되었습니다.',
+         '지금은 5·18 관련 전시 공간과 시민 공간으로 쓰입니다.'],
+   book:'소설이 그리는 무차별적 폭력이 실제로 남긴 물리적 흔적. 정대가 쓰러진 거리의 공포를 실감할 수 있는 곳입니다.',
+   chIds:['jeongdae'],
+   tip:'탄흔이 보존된 층을 먼저 찾아보세요.' },
+
+ { id:'archives', name:'5·18민주화운동기록관', area:'동구 금남로 221 · 옛 가톨릭센터',
+   img:'images/archives.jpg', credit:'',
+   desc:['2011년 유네스코 세계기록유산으로 등재된 5·18 기록물을 보존·전시하는 곳입니다.',
+         '시민들의 일기, 성명서, 사진, 증언 기록 등을 볼 수 있습니다.'],
+   book:'검열로 지워진 원고(3장)와 녹음기 앞에서 망설이는 증언(5장). 소설이 계속 묻는 “기록하고 증언한다는 것”의 의미와 직접 이어집니다.',
+   chIds:['eunsook','seonju'],
+   tip:'증언 영상 코너가 있다면 잠시 앉아서 들어 보세요. 5장을 읽기 전과 후가 다르게 느껴질 거예요.' },
+
+ { id:'freedom', name:'5·18자유공원', area:'서구 치평동 · 상무지구',
+   img:'images/freedom.jpg', credit:'',
+   desc:['항쟁 이후 끌려간 시민들이 갇히고 재판을 받았던 옛 상무대 영창과 법정을 재현해 놓은 공원입니다.'],
+   book:'4장 「쇠와 피」에서 ‘나’와 진수 형이 겪은 수감과 고문의 공간을 떠올리게 합니다.',
+   chIds:['jinsu','seonju'],
+   tip:'영창 내부의 좁은 공간에 잠시 서 보며 4장의 질문 “인간이란 무엇인가”를 함께 나눠 보세요.' },
+
+ { id:'oldcemetery', name:'5·18 구묘역(망월동)', area:'북구 망월동 · 광주시립공원묘지 제3묘역',
+   img:'images/oldcemetery.jpg', credit:'',
+   desc:['1980년 희생자들이 처음 묻힌 곳. 군사정권 시절 참배가 감시와 방해를 받던 때에도 유가족과 시민들이 이곳을 지켰습니다.',
+         '희생자들이 국립묘지로 이장된 뒤에도 민주화운동 열사들의 묘가 남아 있습니다.'],
+   book:'아들을 잃고 30년을 견딘 어머니(6장)와 같은 유가족들이 오랫동안 지켜 온 자리입니다.',
+   chIds:['mother'],
+   tip:'국립5·18민주묘지와 걸어서 이동할 수 있을 만큼 가까우니 함께 둘러보세요.' },
+
+ { id:'cemetery', name:'국립5·18민주묘지', area:'북구 민주로 200',
+   img:'images/cemetery.jpg', credit:'',
+   desc:['5·18 희생자들을 모시기 위해 1997년에 조성된 묘역으로, 이후 국립묘지가 되었습니다.',
+         '추모탑과 묘역, 희생자들의 영정을 모신 유영봉안소가 있습니다.'],
+   book:'에필로그에서 작가는 눈 덮인 묘지에서 동호의 묘 앞에 초를 밝힙니다. 1장의 촛불과 마지막 장면이 이어지는 곳입니다.',
+   chIds:['author','mother'],
+   tip:'유영봉안소에서 동호와 비슷한 나이의 희생자 영정을 찾아보세요. 참배 예절을 미리 함께 안내하면 좋습니다.' }
+];
+
+const NAMES = {dongho:'동호',jeongdae:'정대',eunsook:'은숙',jinsu:'진수와 나',seonju:'선주',mother:'어머니',author:'작가'};
+const $ = s => document.querySelector(s);
+const esc = s => s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+
+/* 사진이 없을 때 쓰는 자리표시 그림 */
+const placeholder = name => 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500"><rect width="800" height="500" fill="#23293C"/>
+   <rect x="0" y="380" width="800" height="120" fill="#1A1F2E"/><circle cx="640" cy="110" r="38" fill="#E3A13B" opacity=".5"/>
+   <text x="50%" y="48%" text-anchor="middle" font-family="serif" font-size="40" fill="#F1F2EE">${name}</text>
+   <text x="50%" y="58%" text-anchor="middle" font-family="sans-serif" font-size="18" fill="#A3A9B5">images 폴더에 사진을 넣어 주세요</text></svg>`);
+
+function render(cur){
+  const p = PLACES.find(x => x.id === cur) || PLACES[0];
+  $('#list').innerHTML = PLACES.map(x =>
+    `<li><button type="button" data-id="${x.id}" aria-pressed="${x.id===p.id}">${esc(x.name)}<small>${esc(x.area.split(' · ')[0])}</small></button></li>`).join('');
+  const map = 'https://map.kakao.com/?q=' + encodeURIComponent('광주 ' + p.name.replace(/\(.*\)/,''));
+  $('#detail').innerHTML = `
+    <figure>
+      <img class="photo" src="${p.img}" alt="${esc(p.name)} 사진"
+           onerror="this.onerror=null;this.src=placeholder('${p.name}')">
+      ${p.credit ? `<figcaption>사진: ${esc(p.credit)}</figcaption>` : ''}
+    </figure>
+    <h2>${esc(p.name)}</h2>
+    <p class="addr">${esc(p.area)}</p>
+    <div class="desc">${p.desc.map(d => `<p>${esc(d)}</p>`).join('')}</div>
+    <section class="book">
+      <h3>책 속에서</h3>
+      <p>${esc(p.book)}</p>
+      <div class="links">${p.chIds.map(c => `<a class="btn ghost" href="comic.html#${c}">${NAMES[c]} 웹툰 보기</a>`).join('')}</div>
+    </section>
+    <section class="tip"><h3>현장 팁</h3><p>${esc(p.tip)}</p></section>
+    <a class="btn" href="${map}" target="_blank" rel="noopener">카카오맵에서 위치 보기</a>`;
+}
+$('#list').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (b) location.hash = b.dataset.id;
+});
+window.addEventListener('hashchange', () => render(location.hash.slice(1)));
+render(location.hash.slice(1));
+</script>
+</body>
+</html>
